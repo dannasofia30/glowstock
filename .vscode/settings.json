@@ -1,0 +1,10 @@
+{
+    "files.exclude": {
+        "copilot": true
+    },
+    "search.exclude": {
+        "copilot": true
+    },
+    "search.useGlobalIgnoreFiles": true,
+    "search.useParentIgnoreFiles": true
+}

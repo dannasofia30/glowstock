@@ -1,10 +1,6 @@
-import { HolaMundo } from '@/components/home/HolaMundo';
+import { InventoryDashboard } from '@/components/home/InventoryDashboard';
 
 export default function HomePage() {
-  return (
-    <main className="relative min-h-screen overflow-hidden">
-      <HolaMundo />
-    </main>
-  );
+  return <InventoryDashboard />;
 }
 

@@ -1,13 +1,20 @@
 import type { ReactNode } from 'react';
 
 const navItems = [
-  { label: 'Dashboard', href: '/', active: true },
-  { label: 'Productos', href: '/products', active: false },
-  { label: 'Movimientos', href: '#', active: false },
-  { label: 'Reportes', href: '#', active: false },
+  { label: 'Dashboard', href: '/' },
+  { label: 'Productos', href: '/products' },
+  { label: 'Usuarios', href: '/users' },
+  { label: 'Movimientos', href: '#' },
+  { label: 'Reportes', href: '#' },
 ];
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({
+  children,
+  activeHref = '/',
+}: {
+  children: ReactNode;
+  activeHref?: string;
+}) {
   return (
     <div className="min-h-screen bg-slate-950 text-white">
       <header className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950/80 backdrop-blur-sm">
@@ -28,7 +35,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 key={item.label}
                 href={item.href}
                 className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
-                  item.active
+                  item.href === activeHref
                     ? 'bg-violet-500/15 text-violet-200'
                     : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                 }`}
@@ -61,7 +68,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 key={item.label}
                 href={item.href}
                 className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm transition ${
-                  item.active
+                  item.href === activeHref
                     ? 'bg-violet-500/15 text-violet-200'
                     : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                 }`}

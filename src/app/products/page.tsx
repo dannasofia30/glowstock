@@ -28,7 +28,7 @@ function getStatusClasses(status: string) {
 
 export default function ProductsPage() {
   return (
-    <AppShell>
+    <AppShell activeHref="/products">
       <div className="space-y-6">
         <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>

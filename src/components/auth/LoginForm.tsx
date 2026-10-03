@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
+import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -41,18 +42,36 @@ export function LoginForm() {
 
     setIsSubmitting(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 700));
+    try {
+      const supabase = getSupabaseBrowserClient();
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      });
 
-    const normalizedEmail = email.trim().toLowerCase();
+      if (error || !data.user) {
+        setSubmitError('Correo o contraseña incorrectos');
+        return;
+      }
 
-    if (normalizedEmail === 'demo@glowstock.com' && password === 'demo1234') {
-      // TODO: conectar con la API real donde iría la llamada de verdad.
+      const { data: profile, error: profileError } = await supabase
+        .from('usuarios')
+        .select('activo')
+        .eq('id', data.user.id)
+        .single();
+
+      if (profileError || !profile?.activo) {
+        await supabase.auth.signOut();
+        setSubmitError('No se encontró un perfil activo para esta cuenta.');
+        return;
+      }
+
       router.push('/');
-      return;
+    } catch {
+      setSubmitError('No fue posible conectar con el servicio de autenticación.');
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setSubmitError('Correo o contraseña incorrectos');
-    setIsSubmitting(false);
   };
 
   return (
@@ -91,7 +110,7 @@ export function LoginForm() {
                 }
               }}
               className="w-full rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-3 text-base text-white placeholder:text-slate-400 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-500/30"
-              placeholder="demo@glowstock.com"
+              placeholder="correo@empresa.com"
               aria-invalid={Boolean(errors.email)}
             />
             {errors.email ? (

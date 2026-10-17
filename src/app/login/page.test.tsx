@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import LoginPage from './page';
+import { LoginForm } from '@/components/auth/LoginForm';
 
 const pushMock = vi.fn();
 const {
@@ -10,6 +10,7 @@ const {
   mockEq,
   mockSelect,
   mockFrom,
+  mockResetPasswordForEmail,
 } = vi.hoisted(() => ({
   mockSignIn: vi.fn(),
   mockSignOut: vi.fn(),
@@ -17,6 +18,7 @@ const {
   mockEq: vi.fn(),
   mockSelect: vi.fn(),
   mockFrom: vi.fn(),
+  mockResetPasswordForEmail: vi.fn(),
 }));
 
 vi.mock('next/navigation', () => ({
@@ -30,6 +32,7 @@ vi.mock('@/lib/supabase/client', () => ({
     auth: {
       signInWithPassword: mockSignIn,
       signOut: mockSignOut,
+      resetPasswordForEmail: mockResetPasswordForEmail,
     },
     from: mockFrom,
   }),
@@ -40,6 +43,7 @@ describe('LoginPage', () => {
     pushMock.mockReset();
     mockSignIn.mockReset();
     mockSignOut.mockReset().mockResolvedValue({ error: null });
+    mockResetPasswordForEmail.mockReset().mockResolvedValue({ error: null });
     mockSingle.mockReset().mockResolvedValue({ data: { activo: true }, error: null });
     mockEq.mockReset().mockReturnValue({ single: mockSingle });
     mockSelect.mockReset().mockReturnValue({ eq: mockEq });
@@ -47,7 +51,7 @@ describe('LoginPage', () => {
   });
 
   it('muestra errores de validación cuando el formulario es inválido', async () => {
-    render(<LoginPage />);
+    render(<LoginForm />);
 
     fireEvent.click(screen.getByRole('button', { name: /entrar/i }));
 
@@ -60,7 +64,7 @@ describe('LoginPage', () => {
       data: { user: { id: 'user-1' } },
       error: null,
     });
-    render(<LoginPage />);
+    render(<LoginForm />);
 
     fireEvent.change(screen.getByLabelText(/correo electrónico/i), {
       target: { value: ' USER@GLOWSTOCK.COM ' },
@@ -87,7 +91,7 @@ describe('LoginPage', () => {
       data: { user: null },
       error: { message: 'Invalid login credentials' },
     });
-    render(<LoginPage />);
+    render(<LoginForm />);
 
     fireEvent.change(screen.getByLabelText(/correo electrónico/i), {
       target: { value: 'user@glowstock.com' },
@@ -107,7 +111,7 @@ describe('LoginPage', () => {
       error: null,
     });
     mockSingle.mockResolvedValue({ data: { activo: false }, error: null });
-    render(<LoginPage />);
+    render(<LoginForm />);
 
     fireEvent.change(screen.getByLabelText(/correo electrónico/i), {
       target: { value: 'user@glowstock.com' },
@@ -122,5 +126,12 @@ describe('LoginPage', () => {
     ).toBeTruthy();
     expect(mockSignOut).toHaveBeenCalled();
     expect(pushMock).not.toHaveBeenCalled();
+  });
+
+  it('dirige a la página de recuperación de contraseña desde el login', async () => {
+    render(<LoginForm />);
+
+    expect(screen.getByRole('link', { name: '¿Olvidaste tu contraseña?' }).getAttribute('href'))
+      .toBe('/recuperar-contrasena');
   });
 });

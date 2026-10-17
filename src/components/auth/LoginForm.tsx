@@ -1,12 +1,13 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function LoginForm() {
+export function LoginForm({ passwordChanged = false }: { passwordChanged?: boolean }) {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -90,6 +91,14 @@ export function LoginForm() {
           <p className="mt-2 text-sm text-slate-300">
             Accede al sistema de inventario.
           </p>
+          {passwordChanged ? (
+            <p
+              className="mt-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200"
+              role="status"
+            >
+              Tu contraseña se restableció correctamente. Inicia sesión con la nueva contraseña.
+            </p>
+          ) : null}
         </div>
 
         <form className="space-y-5" onSubmit={handleSubmit} noValidate>
@@ -163,13 +172,12 @@ export function LoginForm() {
         </form>
 
         <div className="mt-5 text-center">
-          <a
-            href="#"
-            onClick={(event) => event.preventDefault()}
+          <Link
+            href="/recuperar-contrasena"
             className="text-sm font-medium text-violet-300 transition hover:text-violet-200"
           >
-            ¿Olvidé mi contraseña?
-          </a>
+            ¿Olvidaste tu contraseña?
+          </Link>
         </div>
       </div>
     </main>

@@ -4,6 +4,7 @@ const navItems = [
   { label: 'Dashboard', href: '/' },
   { label: 'Productos', href: '/products' },
   { label: 'Usuarios', href: '/users' },
+  { label: 'Cambiar contraseña', href: '/settings/password' },
   { label: 'Movimientos', href: '#' },
   { label: 'Reportes', href: '#' },
 ];
@@ -57,6 +58,25 @@ export function AppShell({
             </div>
           </div>
         </div>
+        <nav
+          aria-label="Navegación móvil"
+          className="flex gap-2 overflow-x-auto border-t border-slate-800 px-4 py-2 md:hidden"
+        >
+          {navItems.map((item) => (
+            <a
+              key={item.label}
+              href={item.href}
+              aria-current={item.href === activeHref ? 'page' : undefined}
+              className={`shrink-0 rounded-lg px-3 py-2 text-sm font-medium transition ${
+                item.href === activeHref
+                  ? 'bg-violet-500/15 text-violet-200'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
       </header>
 
       <div className="mx-auto flex max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:px-8">

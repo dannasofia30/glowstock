@@ -94,4 +94,5 @@ export interface Informe {
   unidadesVendidas: number;
   unidadesTransferidas: number;
   totalTransacciones: number;
+  productosCriticos: number;
 }

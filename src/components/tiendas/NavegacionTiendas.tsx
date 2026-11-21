@@ -14,6 +14,9 @@ const enlaces = [
   { href: '/tiendas', etiqueta: 'Inventario' },
   { href: '/tiendas/solicitud', etiqueta: 'Solicitud' },
   { href: '/tiendas/historial', etiqueta: 'Historial' },
+  { href: '/tiendas/transferencia', etiqueta: 'Transferencia' },
+  { href: '/tiendas/ordenes', etiqueta: 'Órdenes' },
+  { href: '/tiendas/informe', etiqueta: 'Informe' },
 ];
 
 function claseEnlace(activo: boolean): string {

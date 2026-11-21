@@ -19,5 +19,4 @@ Criterio de terminado del MVP. La aceptación A-01 a A-13 se ejecuta en el despl
 | A-11 | Dejar el total de un producto en ≤ 10 y ver la matriz | El producto se marca como crítico |  |  |  |
 | A-12 | Ver el historial | Lista las ventas, transferencias (con costo) y órdenes |  |  |  |
 | A-13 | Cerrar el navegador y volver a entrar | Los datos persisten |  |  |  |
-
-> **Nota:** A-14 corresponde a la funcionalidad opcional (P09) y no hace parte de la aceptación del MVP de esta fase.
+| A-14 | (Opcional) Ver el informe del periodo, hacer transferencia manual y recibir una orden pendiente | Informe muestra ventas locales, transferencias con costo total, órdenes y productos críticos; transferencia manual respeta stock de seguridad; al recibir una orden pendiente sube el stock de la sucursal |  |  |  |

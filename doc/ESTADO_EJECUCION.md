@@ -13,7 +13,7 @@
 | 5 · Interfaz | P06 | COMPLETADO |
 | 5 · Interfaz | P07 | COMPLETADO |
 | 5 · Interfaz | P08 | COMPLETADO |
-| 7 · Opcionales | P09 | PENDIENTE |
+| 7 · Opcionales | P09 | COMPLETADO |
 
 ## Bitácora
 

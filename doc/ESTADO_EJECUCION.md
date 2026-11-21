@@ -10,8 +10,8 @@
 | 3 · Servidor | P03 | COMPLETADO |
 | 4 · Datos y API | P04 | COMPLETADO |
 | 4 · Datos y API | P05 | COMPLETADO |
-| 5 · Interfaz | P06 | PENDIENTE |
-| 5 · Interfaz | P07 | PENDIENTE |
+| 5 · Interfaz | P06 | COMPLETADO |
+| 5 · Interfaz | P07 | COMPLETADO |
 | 5 · Interfaz | P08 | PENDIENTE |
 | 7 · Opcionales | P09 | PENDIENTE |
 
@@ -155,6 +155,25 @@
 - `npm run build`: compilación y TypeScript correctos (rutas dinámicas del módulo registradas). `npm test`: 16 archivos y 56 pruebas pasaron.
 - Se creó `doc/checkpoints/FASE_4_COMPLETADA.md`.
 
+### 2026-11-21 — P06
+- Se agregaron los tokens de color de la sección 13 del plan en `src/app/globals.css` (`:root` y `@theme inline`, Tailwind 4) sin eliminar estilos existentes.
+- Se crearon componentes reutilizables en `src/components/ui/`: `Boton` (primario, secundario, peligro, fantasma; prop `cargando`), `Campo`, `Selector`, `Tarjeta`, `Insignia` (neutro, local, transferencia, proveedor, crítico), `Aviso` (info, éxito, advertencia, error), `Modal` y `EstadoVacio`, con foco visible y contraste.
+- Se verificó `src/app/page.tsx`: mantiene redirección a `/tiendas` con sesión y a `/login` sin sesión (alineado con P03).
+- Se implementó la navegación y el layout del módulo: `src/components/tiendas/NavegacionTiendas.tsx` (enlaces Inventario, Solicitud e Historial; menú móvil; cierre de sesión limpiando cookie `tiendas_access_token` y sesión de Supabase) y `src/app/tiendas/layout.tsx` (servidor, `obtenerSesion()` y redirección a `/login` si no hay sesión).
+- Se implementó la matriz de inventario: `src/components/tiendas/InsigniaCritico.tsx`, `src/components/tiendas/MatrizInventario.tsx` y `src/app/tiendas/page.tsx` (servidor, `listarInventario`, `force-dynamic`). La vista muestra una fila por producto con columnas de stock A/B/C, total destacado e insignia crítica cuando el total ≤ 10; incluye filtro por categoría, "solo críticos", botón "Nuevo producto", estado vacío y tarjetas apiladas en móvil.
+- Verificación: `npm test` → 16 archivos y 56 pruebas pasaron. `npm run build` → compilación y verificación TypeScript correctas; la ruta `/tiendas` se genera como dinámica (`ƒ`).
+- Verificación visual manual con datos demo/sesión iniciada: no ejecutada en este entorno por requerir credenciales válidas y datos de base; puede realizarse iniciando `npm run dev`, autenticándose y revisando `/tiendas` (matriz A/B/C, total, críticos, filtro "solo críticos" y vista móvil).
+
+### 2026-11-21 — P07
+- Se creó `src/components/tiendas/FormularioProducto.tsx` (cliente) con campos código, nombre, categoría, precio y stock mínimo; valida con `esquemaProducto` antes de enviar, realiza `POST /api/tiendas/productos`, muestra el mensaje de `PRODUCTO_DUPLICADO` cuando aplica y redirige a `/tiendas` al crear (el producto nace con existencias 0 en A, B y C según la capa de datos).
+- Se creó `src/app/tiendas/productos/nuevo/page.tsx` para renderizar el formulario de registro de producto.
+- Se creó `src/components/tiendas/FormularioEntrada.tsx` (cliente) para registrar entradas por sucursal (selector A/B/C y cantidad) vía `POST /api/tiendas/productos/[codigo]/entrada`; tras una entrada exitosa actualiza la vista con `router.refresh()`.
+- Se creó `src/app/tiendas/productos/[codigo]/page.tsx` (servidor, `force-dynamic`): obtiene el producto con `obtenerProducto` (usa `notFound()` si no existe), muestra datos y stock por sucursal A/B/C con total/estado crítico, incluye `FormularioEntrada` y lista las transacciones del producto (`listarTransacciones` por `productoCodigo`) en tabla/tarjetas responsivas.
+- Se añadió navegación al detalle desde la matriz en `src/components/tiendas/MatrizInventario.tsx` (enlace por producto a `/tiendas/productos/[codigo]`) para facilitar el ingreso de stock.
+- Ajuste de compatibilidad TypeScript (`exactOptionalPropertyTypes`): `src/components/ui/Campo.tsx` y `src/components/ui/Selector.tsx` aceptan `error`/`ayuda`/`placeholder` como `string | undefined`.
+- Verificación: `npm test` → 16 archivos y 56 pruebas pasaron. `npm run build` → compilación y verificación TypeScript correctas; rutas dinámicas registradas: `ƒ /tiendas/productos/nuevo` y `ƒ /tiendas/productos/[codigo]`.
+- Verificación visual/manual con sesión y datos reales: no ejecutada en este entorno por requerir credenciales válidas de Supabase/base de datos. Puede comprobarse iniciando sesión, creando un producto, ingresando stock en A/B/C, verificando actualización en la matriz y probando un código repetido.
+
 ## Siguiente paso
 
-Fase 4 completada (P04 y P05). Continuar con P06 (interfaz) según `doc/PLAN_INTERTIENDAS.md` y `doc/PROMPTS INTERTIENDAS.md`. La verificación manual autenticada de los endpoints HTTP y `db:demo` pueden repetirse cuando se disponga de credenciales/sesión válidas en el entorno.
+Continuar con P08 (interfaz: solicitud de compra, resultado e historial) según `doc/PLAN_INTERTIENDAS.md` y `doc/PROMPTS INTERTIENDAS.md`. La verificación manual autenticada de P07 puede realizarse cuando se disponga de credenciales y datos de base.

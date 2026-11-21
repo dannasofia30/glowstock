@@ -7,13 +7,20 @@ import { ErrorDeNegocio } from '@/lib/reglas/errores';
 const COOKIE_SESION = 'tiendas_access_token';
 
 function obtenerUrlSupabase(): string | undefined {
-  return process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.GLOWSTOCK_SUPABASE_URL;
+  return (
+    process.env.NEXT_PUBLIC_SUPABASE_URL ??
+    process.env.NEXT_PUBLIC_GLOWSTOCK_GLOWSTOCKSUPABASE_URL ??
+    process.env.GLOWSTOCK_SUPABASE_URL
+  );
 }
 
 function obtenerClavePublicaSupabase(): string | undefined {
   return (
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
-    process.env.GLOWSTOCK_SUPABASE_PUBLISHABLE_KEY
+    process.env.NEXT_PUBLIC_GLOWSTOCK_GLOWSTOCKSUPABASE_PUBLISHABLE_KEY ??
+    process.env.NEXT_PUBLIC_GLOWSTOCK_GLOWSTOCKSUPABASE_ANON_KEY ??
+    process.env.GLOWSTOCK_SUPABASE_PUBLISHABLE_KEY ??
+    process.env.GLOWSTOCK_SUPABASE_ANON_KEY
   );
 }
 

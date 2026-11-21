@@ -3,8 +3,16 @@ import 'server-only';
 import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js';
 import type { Database } from './database';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+const supabaseUrl =
+  process.env.NEXT_PUBLIC_SUPABASE_URL ??
+  process.env.NEXT_PUBLIC_GLOWSTOCK_GLOWSTOCKSUPABASE_URL ??
+  process.env.GLOWSTOCK_SUPABASE_URL;
+const publishableKey =
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+  process.env.NEXT_PUBLIC_GLOWSTOCK_GLOWSTOCKSUPABASE_PUBLISHABLE_KEY ??
+  process.env.NEXT_PUBLIC_GLOWSTOCK_GLOWSTOCKSUPABASE_ANON_KEY ??
+  process.env.GLOWSTOCK_SUPABASE_PUBLISHABLE_KEY ??
+  process.env.GLOWSTOCK_SUPABASE_ANON_KEY;
 const serviceRoleKey = process.env.GLOWSTOCK_SUPABASE_SERVICE_ROLE_KEY;
 
 export function createSupabaseAdminClient(): SupabaseClient<Database> {

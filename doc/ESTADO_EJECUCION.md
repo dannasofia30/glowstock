@@ -12,7 +12,7 @@
 | 4 · Datos y API | P05 | COMPLETADO |
 | 5 · Interfaz | P06 | COMPLETADO |
 | 5 · Interfaz | P07 | COMPLETADO |
-| 5 · Interfaz | P08 | PENDIENTE |
+| 5 · Interfaz | P08 | COMPLETADO |
 | 7 · Opcionales | P09 | PENDIENTE |
 
 ## Bitácora
@@ -174,6 +174,34 @@
 - Verificación: `npm test` → 16 archivos y 56 pruebas pasaron. `npm run build` → compilación y verificación TypeScript correctas; rutas dinámicas registradas: `ƒ /tiendas/productos/nuevo` y `ƒ /tiendas/productos/[codigo]`.
 - Verificación visual/manual con sesión y datos reales: no ejecutada en este entorno por requerir credenciales válidas de Supabase/base de datos. Puede comprobarse iniciando sesión, creando un producto, ingresando stock en A/B/C, verificando actualización en la matriz y probando un código repetido.
 
+### 2026-11-21 — P08 (Fases 5 y 6)
+- Se implementó la pantalla central de solicitud de compra:
+  - `src/components/tiendas/FormularioSolicitud.tsx` (cliente): selector de producto (código/nombre), sucursal solicitante (A/B/C) y cantidad; envía `POST /api/tiendas/solicitud`, muestra errores y renderiza el resultado.
+  - `src/components/tiendas/ResultadoSolicitud.tsx`: muestra con claridad la decisión según su tipo, con texto y color (no solo color): venta local en la sucursal solicitante, transferencia con origen/destino y costo logístico formateado, u orden al proveedor por 50 unidades con motivo (`agotamiento_total` o `sin_candidata_viable`). Indica si el producto quedó crítico con el total en red.
+  - `src/app/tiendas/solicitud/page.tsx` (servidor, `force-dynamic`): carga productos activos para el selector y muestra estado vacío si no hay productos.
+- Se implementó el historial de transacciones:
+  - `src/components/tiendas/TablaTransacciones.tsx`: filtros por producto, tipo, sucursal y rango de fechas; columnas fecha, tipo, producto, origen, destino, cantidad, costo logístico y motivo; tabla responsiva y tarjetas en móvil.
+  - `src/app/tiendas/historial/page.tsx` (servidor, `force-dynamic`): aplica `listarTransacciones` con filtros validados/normalizados (rango de fechas inclusivo cuando se envía `YYYY-MM-DD`) y carga productos para el filtro.
+- **Revisión (Tarea 3, secciones 7 y 15) y correcciones en bitácora:**
+  - Algoritmo de decisión en `src/lib/reglas/solicitud.ts` (función pura): correcto, sin acceso a BD/red/reloj. Sin correcciones.
+  - Solicitud atómica y sin stock negativo: `src/lib/datos/solicitudes.ts` usa `conTransaccion` y `bloquearStock(... FOR UPDATE)`; las actualizaciones ocurren en la transacción y la BD tiene restricciones de no negatividad. Sin correcciones.
+  - Elección de origen por menor costo con desempate A/B/C y respeto del stock de seguridad (≥ 5 tras transferir): implementado en reglas puras y aplicado por la capa de datos. Sin correcciones.
+  - Costos y montos en pesos enteros; cantidades enteras: se mantienen como enteros. Sin correcciones.
+  - "Hoy" con `new Date()` fuera de `fechas.ts`: no se encontraron usos fuera de `src/lib/reglas/fechas.ts` en reglas/datos/API del módulo; el reloj solo se usa como parámetro por defecto en `hoyBogota` dentro de `fechas.ts`. Sin correcciones.
+  - Rutas `/api/tiendas/*` protegidas con `exigirSesion()` como primera instrucción (incluidas solicitud y transacciones). Sin correcciones.
+  - SQL parametrizado (sin concatenación de valores de usuario). Sin correcciones.
+  - Resultado comunicado con texto y color (no solo color) en la UI de solicitud. Sin correcciones.
+  - Ajuste asociado a preparación de aceptación: `scripts/limpiar-prueba.mjs` actualizado para soportar `--prueba` (limpia solo `IT-TEST-*`, conserva datos demo) y selección de conexión compatible con scripts operativos.
+- Verificación solicitada (Tarea 4):
+  - `npm test` → 16 archivos y 56 pruebas pasaron.
+  - `npm run probar:flujo` → 11 OK, 0 FALLA (venta local, transferencia desde B con costo 16000, órdenes por `sin_candidata_viable` y `agotamiento_total`, rechazo de cantidad 0 e historial correcto).
+  - `npm run db:limpiar -- --prueba` → limpieza de datos de prueba completada (se conservan datos demo).
+  - `npm run build` → compilación y verificación TypeScript correctas; rutas dinámicas registradas: `ƒ /tiendas/solicitud`, `ƒ /tiendas/historial`.
+- Se creó `doc/ACEPTACION.md` con la tabla A-01 a A-13 (columnas ID, acción, resultado esperado, resultado obtenido, evidencia, observación; últimas tres vacías) y nota indicando que A-14 corresponde a la opcional (P09).
+- Se actualizó `README.md` con descripción, funcionalidades, requisitos, pasos para correr en local (nombres de variables en `.env.local`, `db:migrar`, `db:demo`, `dev`), scripts, nota del algoritmo/reglas (venta local, transferencia por menor costo, orden al proveedor, seguridad 5, lote 50, reorden global 10) y enlace al plan.
+- Verificación de entorno/versionado (Tarea 7): `.env.local` está cubierto por `.gitignore` (`.env*`, `.env*.local`) y verificado con `git check-ignore -v .env.local`; no se detectaron archivos versionados con valores de variables de entorno en la revisión realizada.
+- Se crearon `doc/checkpoints/FASE_5_COMPLETADA.md` y `doc/checkpoints/FASE_6_COMPLETADA.md`.
+
 ## Siguiente paso
 
-Continuar con P08 (interfaz: solicitud de compra, resultado e historial) según `doc/PLAN_INTERTIENDAS.md` y `doc/PROMPTS INTERTIENDAS.md`. La verificación manual autenticada de P07 puede realizarse cuando se disponga de credenciales y datos de base.
+Ejecutar en el despliegue de Vercel la aceptación A-01 a A-13 documentada en `doc/ACEPTACION.md`. Continuar con P09 (opcionales) solo cuando corresponda y la fase previa esté validada.

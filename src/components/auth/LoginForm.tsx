@@ -7,7 +7,21 @@ import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function LoginForm({ passwordChanged = false }: { passwordChanged?: boolean }) {
+function obtenerDestinoSeguro(siguiente?: string): string {
+  if (siguiente && siguiente.startsWith('/') && !siguiente.startsWith('//')) {
+    return siguiente;
+  }
+
+  return '/tiendas';
+}
+
+export function LoginForm({
+  passwordChanged = false,
+  siguiente,
+}: {
+  passwordChanged?: boolean;
+  siguiente?: string | undefined;
+}) {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -67,7 +81,16 @@ export function LoginForm({ passwordChanged = false }: { passwordChanged?: boole
         return;
       }
 
-      router.push('/');
+      const token = data.session?.access_token;
+      if (!token) {
+        await supabase.auth.signOut();
+        setSubmitError('No fue posible iniciar la sesión.');
+        return;
+      }
+
+      const seguro = window.location.protocol === 'https:' ? '; Secure' : '';
+      document.cookie = `tiendas_access_token=${encodeURIComponent(token)}; Path=/; SameSite=Lax${seguro}`;
+      router.push(obtenerDestinoSeguro(siguiente));
     } catch {
       setSubmitError('No fue posible conectar con el servicio de autenticación.');
     } finally {

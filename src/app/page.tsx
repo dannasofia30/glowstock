@@ -1,6 +1,13 @@
-import { InventoryDashboard } from '@/components/home/InventoryDashboard';
+import { redirect } from 'next/navigation';
+import { obtenerSesion } from '@/lib/auth/sesion';
 
-export default function HomePage() {
-  return <InventoryDashboard />;
+export default async function HomePage() {
+  const sesion = await obtenerSesion();
+
+  if (sesion) {
+    redirect('/tiendas');
+  }
+
+  redirect('/login');
 }
 

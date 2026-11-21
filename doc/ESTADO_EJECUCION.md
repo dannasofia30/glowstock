@@ -7,7 +7,7 @@
 | 0 · Conciliación | P00 | COMPLETADO |
 | 1 · Base de datos | P01 | COMPLETADO |
 | 2 · Reglas de negocio | P02 | COMPLETADO |
-| 3 · Servidor | P03 | PENDIENTE |
+| 3 · Servidor | P03 | COMPLETADO |
 | 4 · Datos y API | P04 | PENDIENTE |
 | 4 · Datos y API | P05 | PENDIENTE |
 | 5 · Interfaz | P06 | PENDIENTE |
@@ -100,6 +100,15 @@
 - `npm test`: 16 archivos y 54 pruebas pasaron.
 - `npm run build`: compilación y verificación TypeScript correctas.
 
+### 2026-11-21 — P03
+- Se implementó la infraestructura del servidor: `src/lib/db/conexion.ts` con `pg`, `GLOWSTOCK_POSTGRES_URL`, SSL y parsers; `src/lib/http/respuestas.ts`; `src/lib/validacion/esquemas.ts`; `src/lib/formato.ts`.
+- Se adaptó el login existente de Supabase Auth como puerta para Inter-Tiendas: `src/lib/auth/sesion.ts` envuelve la sesión (`obtenerSesion`, `exigirSesion` con `NO_AUTORIZADO`), el formulario de login guarda la cookie `tiendas_access_token` y redirige a `/tiendas`, y `src/app/page.tsx` redirige según sesión.
+- Se añadió `src/proxy.ts` para proteger `/tiendas/:path*` y `/api/tiendas/:path*` (páginas a `/login?siguiente=...`, API 401 con formato estándar y `Cache-Control: no-store`).
+- Se creó `src/app/api/tiendas/sesion/route.ts` (`GET`, `force-dynamic`, `exigirSesion`, respuesta `{ email }`) y `src/app/tiendas/page.tsx` como destino mínimo.
+- Verificación: `npm test` → 16 archivos y 56 pruebas pasaron; `npm run build` → compilación y TypeScript correctos.
+- Verificación sin sesión en `npm run dev`: `GET /api/tiendas/sesion` devolvió 401 con `NO_AUTORIZADO` y `Cache-Control: no-store`; `GET /tiendas` devolvió redirección a `/login?siguiente=%2Ftiendas`.
+- No se pudo verificar manualmente el inicio de sesión con credenciales reales de Supabase en este entorno; la decisión de login quedó documentada en `doc/checkpoints/FASE_3_COMPLETADA.md`.
+
 ## Siguiente paso
 
-P01 está completado. Continuar con P03 según el plan técnico.
+P03 está completado. Continuar con P04 según el plan técnico.

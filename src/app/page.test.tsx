@@ -1,12 +1,36 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import HomePage from './page';
 
-describe('HomePage', () => {
-  it('muestra el panel principal del inventario', () => {
-    render(<HomePage />);
+const redirectMock = vi.fn();
+const obtenerSesionMock = vi.fn();
 
-    expect(screen.getByRole('heading', { name: /inventario/i })).toBeTruthy();
-    expect(screen.getByText(/resumen general/i)).toBeTruthy();
+vi.mock('next/navigation', () => ({
+  redirect: (...args: unknown[]) => redirectMock(...args),
+}));
+
+vi.mock('@/lib/auth/sesion', () => ({
+  obtenerSesion: () => obtenerSesionMock(),
+}));
+
+describe('HomePage', () => {
+  beforeEach(() => {
+    redirectMock.mockReset();
+    obtenerSesionMock.mockReset();
+  });
+
+  it('redirige a /tiendas cuando hay sesión', async () => {
+    obtenerSesionMock.mockResolvedValue({ email: 'user@glowstock.com' });
+
+    await HomePage();
+
+    expect(redirectMock).toHaveBeenCalledWith('/tiendas');
+  });
+
+  it('redirige a /login cuando no hay sesión', async () => {
+    obtenerSesionMock.mockResolvedValue(null);
+
+    await HomePage();
+
+    expect(redirectMock).toHaveBeenCalledWith('/login');
   });
 });

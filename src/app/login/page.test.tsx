@@ -59,9 +59,9 @@ describe('LoginPage', () => {
     expect(await screen.findByText('La contraseña es obligatoria.')).toBeTruthy();
   });
 
-  it('autentica con Supabase y requiere un perfil activo', async () => {
+  it('autentica con Supabase, guarda la sesión de tiendas y redirige a /tiendas', async () => {
     mockSignIn.mockResolvedValue({
-      data: { user: { id: 'user-1' } },
+      data: { user: { id: 'user-1' }, session: { access_token: 'token-prueba' } },
       error: null,
     });
     render(<LoginForm />);
@@ -76,7 +76,7 @@ describe('LoginPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /entrar/i }));
 
     await waitFor(() => {
-      expect(pushMock).toHaveBeenCalledWith('/');
+      expect(pushMock).toHaveBeenCalledWith('/tiendas');
     });
     expect(mockSignIn).toHaveBeenCalledWith({
       email: 'user@glowstock.com',
@@ -84,6 +84,7 @@ describe('LoginPage', () => {
     });
     expect(mockFrom).toHaveBeenCalledWith('usuarios');
     expect(mockEq).toHaveBeenCalledWith('id', 'user-1');
+    expect(document.cookie).toContain('tiendas_access_token=');
   });
 
   it('muestra error cuando Supabase rechaza las credenciales', async () => {
@@ -133,5 +134,25 @@ describe('LoginPage', () => {
 
     expect(screen.getByRole('link', { name: '¿Olvidaste tu contraseña?' }).getAttribute('href'))
       .toBe('/recuperar-contrasena');
+  });
+
+  it('redirige a la ruta solicitada cuando el inicio de sesión es válido', async () => {
+    mockSignIn.mockResolvedValue({
+      data: { user: { id: 'user-1' }, session: { access_token: 'token-prueba' } },
+      error: null,
+    });
+    render(<LoginForm siguiente="/tiendas/historial" />);
+
+    fireEvent.change(screen.getByLabelText(/correo electrónico/i), {
+      target: { value: 'user@glowstock.com' },
+    });
+    fireEvent.change(screen.getByLabelText(/contraseña/i), {
+      target: { value: 'correct-password' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /entrar/i }));
+
+    await waitFor(() => {
+      expect(pushMock).toHaveBeenCalledWith('/tiendas/historial');
+    });
   });
 });

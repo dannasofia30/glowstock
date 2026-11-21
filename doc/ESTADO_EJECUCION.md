@@ -9,7 +9,7 @@
 | 2 · Reglas de negocio | P02 | COMPLETADO |
 | 3 · Servidor | P03 | COMPLETADO |
 | 4 · Datos y API | P04 | COMPLETADO |
-| 4 · Datos y API | P05 | PENDIENTE |
+| 4 · Datos y API | P05 | COMPLETADO |
 | 5 · Interfaz | P06 | PENDIENTE |
 | 5 · Interfaz | P07 | PENDIENTE |
 | 5 · Interfaz | P08 | PENDIENTE |
@@ -144,8 +144,17 @@
   ```
 
 - Ajuste de diagnóstico en `scripts/probar-flujo.ts`: la prueba 10 ahora reporta detalle completo con valores esperados y obtenidos (tipos y costo de transferencia) e historial de transacciones para facilitar la depuración de fallas.
-- Nota: la fase 4 sigue abierta hasta P05.
+- Nota: la fase 4 se cerró con P05 (ver bitácora P05 y `doc/checkpoints/FASE_4_COMPLETADA.md`).
+
+### 2026-11-21 — P05
+- Se implementaron las rutas API del módulo mínimo en `src/app/api/tiendas/` (sin informe, transferencia ni órdenes de P09): `GET/POST /api/tiendas/productos`, `GET /api/tiendas/productos/[codigo]`, `POST /api/tiendas/productos/[codigo]/entrada`, `POST /api/tiendas/solicitud`, `GET /api/tiendas/transacciones`.
+- Cada handler aplica `export const dynamic = 'force-dynamic'`, `await exigirSesion()` como primera instrucción, `conManejoDeErrores`, validación con `leerCuerpo`/esquemas Zod y filtros validados; rutas dinámicas usan `await params`. `POST` de creación y entrada responden 201; la solicitud responde 200 con `ResultadoSolicitud` (decisión y nuevo stock).
+- Verificación sin sesión (`npm run dev`, `curl` a `http://localhost:3000`): `GET /api/tiendas/productos` y `POST /api/tiendas/solicitud` devolvieron 401 con `NO_AUTORIZADO` y `Cache-Control: no-store`.
+- Verificación de lógica de negocio: `npm run probar:flujo` ejecutado con éxito contra la base de datos (11 OK, 0 FALLA), incluyendo venta local, transferencia desde B con costo 16000, órdenes por `sin_candidata_viable` y `agotamiento_total`, rechazo de cantidad 0 e historial completo.
+- Verificación con sesión HTTP end-to-end: no completada en este entorno por falta de credenciales válidas de Supabase; se dejó documentado en `doc/checkpoints/FASE_4_COMPLETADA.md` el procedimiento solicitado y la cobertura equivalente vía `probar:flujo`/`dataService`.
+- `npm run build`: compilación y TypeScript correctos (rutas dinámicas del módulo registradas). `npm test`: 16 archivos y 56 pruebas pasaron.
+- Se creó `doc/checkpoints/FASE_4_COMPLETADA.md`.
 
 ## Siguiente paso
 
-P04 implementado; pendiente ejecutar/verificar `db:demo` y `probar:flujo` con credenciales de base de datos válidas en el entorno y continuar con P05 según el plan técnico. La fase 4 sigue abierta hasta P05.
+Fase 4 completada (P04 y P05). Continuar con P06 (interfaz) según `doc/PLAN_INTERTIENDAS.md` y `doc/PROMPTS INTERTIENDAS.md`. La verificación manual autenticada de los endpoints HTTP y `db:demo` pueden repetirse cuando se disponga de credenciales/sesión válidas en el entorno.

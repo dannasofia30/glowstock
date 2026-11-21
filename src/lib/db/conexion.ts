@@ -7,12 +7,27 @@ types.setTypeParser(20, (valor) => parseInt(valor, 10));
 
 const globalParaPool = globalThis as unknown as { poolIntertiendas?: Pool };
 
-const cadenaConexion = process.env.GLOWSTOCK_POSTGRES_URL;
+function obtenerCadenaConexion(): string | undefined {
+  const cadenaConexion = process.env.GLOWSTOCK_POSTGRES_URL;
+  if (!cadenaConexion) {
+    return undefined;
+  }
+
+  try {
+    const url = new URL(cadenaConexion);
+    url.searchParams.delete('sslmode');
+    return url.toString();
+  } catch {
+    return cadenaConexion;
+  }
+}
+
+const connectionString = obtenerCadenaConexion();
 
 export const pool =
   globalParaPool.poolIntertiendas ??
   new Pool({
-    connectionString: cadenaConexion,
+    connectionString,
     ssl: { rejectUnauthorized: false },
     max: 3,
     idleTimeoutMillis: 10_000,

@@ -8,7 +8,7 @@
 | 1 · Base de datos | P01 | COMPLETADO |
 | 2 · Reglas de negocio | P02 | COMPLETADO |
 | 3 · Servidor | P03 | COMPLETADO |
-| 4 · Datos y API | P04 | PENDIENTE |
+| 4 · Datos y API | P04 | COMPLETADO |
 | 4 · Datos y API | P05 | PENDIENTE |
 | 5 · Interfaz | P06 | PENDIENTE |
 | 5 · Interfaz | P07 | PENDIENTE |
@@ -109,6 +109,43 @@
 - Verificación sin sesión en `npm run dev`: `GET /api/tiendas/sesion` devolvió 401 con `NO_AUTORIZADO` y `Cache-Control: no-store`; `GET /tiendas` devolvió redirección a `/login?siguiente=%2Ftiendas`.
 - No se pudo verificar manualmente el inicio de sesión con credenciales reales de Supabase en este entorno; la decisión de login quedó documentada en `doc/checkpoints/FASE_3_COMPLETADA.md`.
 
+### 2026-11-21 — P04
+- Se implementó la capa de datos del módulo Inter-Tiendas en `src/lib/datos/` (`tipos.ts`, `productos.ts`, `existencias.ts`, `solicitudes.ts`, `transacciones.ts`, `ordenes.ts`, `cierre.ts`) y la fachada `src/lib/dataService.ts`.
+- `procesarSolicitud` aplica la secuencia atómica de la sección 8.1 dentro de `conTransaccion`: valida la solicitud, obtiene el producto activo, bloquea existencias (`FOR UPDATE`), decide con `decidirSolicitud`, aplica venta local/transferencia/orden al proveedor, registra la transacción y la orden cuando aplica, y devuelve `{ decision, stock, critico }`.
+- `registrarEntrada` suma stock por sucursal y registra transacción tipo `entrada`; `listarInventario` consulta `v_inventario` con filtros y calcula crítico con `esCritico`; `listarTransacciones` filtra por producto, tipo, sucursal y rango de fechas.
+- Se añadieron scripts `scripts/limpiar-prueba.mjs`, `scripts/cargar-demo.ts` y `scripts/probar-flujo.ts`, y los comandos `db:limpiar`, `db:demo` y `probar:flujo` en `package.json`. Los scripts TS registran paths de `tsconfig`, usan `dataService` para las operaciones y emplean conexión directa con `pg` solo para limpieza/ajustes de preparación cuando es necesario.
+- Se ajustó `src/lib/db/conexion.ts` para eliminar `sslmode` de la cadena de conexión antes de crear el pool (manteniendo SSL y `GLOWSTOCK_POSTGRES_URL`), mejorando compatibilidad de conexión en ejecución local.
+- Verificación: `npm run build` → compilación y TypeScript correctos; `npm test` → 16 archivos y 56 pruebas pasaron.
+- Verificación: no hay importaciones de `src/lib/db/conexion.ts` fuera de `src/lib/datos/`.
+- Ejecución solicitada de `npm run db:demo` (bloqueada en este entorno por autenticación de base de datos):
+
+  ```text
+  > glowstock@0.1.0 db:demo
+  > node --env-file=.env.local --import tsx scripts/cargar-demo.ts
+
+  error: password authentication failed for user "postgres"
+      at parseErrorMessage (node_modules/pg-protocol/src/parser.ts:395:9)
+      at Parser.handlePacket (node_modules/pg-protocol/src/parser.ts:212:19)
+      at Parser.parse (node_modules/pg-protocol/src/parser.ts:105:30)
+      at TLSSocket.<anonymous> (node_modules/pg-protocol/src/index.ts:7:48)
+  ```
+
+- Ejecución solicitada de `npm run probar:flujo` (bloqueada en este entorno por autenticación de base de datos; no se pudieron ejecutar los 11 pasos contra la BD):
+
+  ```text
+  > glowstock@0.1.0 probar:flujo
+  > node --env-file=.env.local --import tsx scripts/probar-flujo.ts
+
+  error: password authentication failed for user "postgres"
+      at parseErrorMessage (node_modules/pg-protocol/src/parser.ts:395:9)
+      at Parser.handlePacket (node_modules/pg-protocol/src/parser.ts:212:19)
+      at Parser.parse (node_modules/pg-protocol/src/parser.ts:105:30)
+      at TLSSocket.<anonymous> (node_modules/pg-protocol/src/index.ts:7:48)
+  ```
+
+- Ajuste de diagnóstico en `scripts/probar-flujo.ts`: la prueba 10 ahora reporta detalle completo con valores esperados y obtenidos (tipos y costo de transferencia) e historial de transacciones para facilitar la depuración de fallas.
+- Nota: la fase 4 sigue abierta hasta P05.
+
 ## Siguiente paso
 
-P03 está completado. Continuar con P04 según el plan técnico.
+P04 implementado; pendiente ejecutar/verificar `db:demo` y `probar:flujo` con credenciales de base de datos válidas en el entorno y continuar con P05 según el plan técnico. La fase 4 sigue abierta hasta P05.

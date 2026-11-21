@@ -12,6 +12,9 @@
     "type-check": "tsc --noEmit",
     "db:migrar": "node --env-file=.env.local scripts/migrar.mjs",
     "db:verificar": "node --env-file=.env.local scripts/verificar-bd.mjs",
+    "db:limpiar": "node --env-file=.env.local scripts/limpiar-prueba.mjs",
+    "db:demo": "node --env-file=.env.local --import tsx scripts/cargar-demo.ts",
+    "probar:flujo": "node --env-file=.env.local --import tsx scripts/probar-flujo.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
